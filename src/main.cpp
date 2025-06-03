@@ -21,6 +21,7 @@ void	DrawUI(const Player &player) {
 	DrawFPS(10, 10);
 	DrawVector("position", player.camera.position, 10, 40);
 	DrawVector("target", player.camera.target, 10, 50);
+	DrawVector("velocity", player.getVelocity(), 10, 60);
 }
 
 
@@ -113,7 +114,7 @@ int main() {
 		BeginMode3D(player.camera);
 
 			// Draws
-			DrawGrid(100, 1);
+			/*DrawGrid(100, 1);*/
 			objectsManager.renderObjects();
 
 		EndMode3D();

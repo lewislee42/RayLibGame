@@ -5,7 +5,7 @@
 
 Player::Player() {
 
-	/* ----- Setting up camera ----- */
+	/* ---- Setting up camera ---- */
 	this->camera			= Camera3D();
 	this->camera.position	= Vector3{0.0f, 1.1f, 0.0f};
 	this->camera.target		= Vector3{0.0f, 0.0f, 1.0f};
@@ -13,14 +13,10 @@ Player::Player() {
 	this->camera.fovy		= 60.0f;
 	this->camera.projection	= CAMERA_PERSPECTIVE;
 
-	/* ----- Setting up misc ----- */
-	this->_mouseSensitivity = 0.4f;
-	this->_playerSpeed = 9.0f;
-
+	/* ---- Setting up Bounding Box ---- */
 	this->_playerWidth	= 1;
 	this->_playerHeight = 1;
 	this->_playerDepth	= 1;
-
 	this->boundingBox = {
 		.min = {
 			camera.position.x - _playerWidth / 2,
@@ -34,13 +30,19 @@ Player::Player() {
 		}
 	};
 
+	/* ---- Setting up misc ---- */
+	this->_mouseSensitivity = 0.4f;
+	this->_playerSpeed = 9.0f;
+	this->_velocity = Vector3{0.0f, 0.0f, 0.0f};
+	this->_isGrounded = false;
+	this->_gravity = -9.3;
+	
 }
 
 Player::~Player() {	
 }
 
 Vector3	Player::_calculateNewPosition(const float &deltaTime, const Vector3 &currentDirection) {
-	Vector3 newPosition = camera.position;
 	Vector3 forward = currentDirection;
 	forward.y = 0;
 	if (Vector3LengthSqr(forward) > 0.001) {
@@ -50,29 +52,38 @@ Vector3	Player::_calculateNewPosition(const float &deltaTime, const Vector3 &cur
 		forward = Vector3{0.0f, 0.0f, 1.0f};
 	}
 
+	_velocity.x = 0;
+	_velocity.z = 0;
+
 	Vector3 right = Vector3CrossProduct(forward, camera.up);
 	right = Vector3Normalize(right);
 
+	/* ---- Handle WASD ---- */
 	if (IsKeyDown(KEY_W)) {
-		newPosition = Vector3Add(newPosition, Vector3Scale(forward, _playerSpeed * deltaTime));
+		_velocity = Vector3Add(_velocity, Vector3Scale(forward, _playerSpeed));
 	}
 	if (IsKeyDown(KEY_S)) {
-		newPosition = Vector3Subtract(newPosition, Vector3Scale(forward, _playerSpeed * deltaTime));
+		_velocity = Vector3Subtract(_velocity, Vector3Scale(forward, _playerSpeed));
 	}
 	if (IsKeyDown(KEY_D)) {
-		newPosition = Vector3Add(newPosition, Vector3Scale(right, _playerSpeed * deltaTime));
+		_velocity = Vector3Add(_velocity, Vector3Scale(right, _playerSpeed));
 	}
 	if (IsKeyDown(KEY_A)) {
-		newPosition = Vector3Subtract(newPosition, Vector3Scale(right, _playerSpeed * deltaTime));
+		_velocity = Vector3Subtract(_velocity, Vector3Scale(right, _playerSpeed));
 	}
 
-	if (IsKeyDown(KEY_SPACE)) {
-		newPosition.y += _playerSpeed * deltaTime;
+	/* ---- Handle jumping ---- */
+	if (IsKeyDown(KEY_SPACE) && _isGrounded) {
+		_velocity.y += 5;
+		_isGrounded = false;
 	}
-	if (IsKeyDown(KEY_LEFT_CONTROL)) {
-		newPosition.y -= _playerSpeed * deltaTime;
+
+	/* ---- Apply gravity ---- */
+	if (!_isGrounded) {
+		_velocity.y += _gravity * deltaTime;
 	}
-	return newPosition;
+
+	return Vector3Add(camera.position, Vector3Scale(_velocity, deltaTime));
 }
 
 void	Player::_updateDirection(const Vector3 &currentDirection) {
@@ -135,13 +146,21 @@ void	Player::updatePlayer(const float &deltaTime, const ObjectsManager &objectsM
 
 
 		if (!objectsManager.collisionCheck(newBoundingBox)) {
+			if (tempPosition.y == camera.position.y) {
+				_isGrounded = true;
+				_velocity.y = 0;
+			}
 			camera.position = tempPosition;
 			boundingBox = newBoundingBox;
 			break;
 		}
 	}
 
-
+	/* ---- Update direction ---- */
 	this->_updateDirection(currentLookDirection);
 
+}
+
+Vector3	Player::getVelocity() const {
+	return _velocity;
 }

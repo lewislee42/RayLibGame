@@ -15,10 +15,14 @@ public:
 	~Player();
 
 	void	updatePlayer(const float &deltaTime, const ObjectsManager& objectsManager);
+	Vector3	getVelocity() const;
 
 private:
 	float	_playerSpeed;
 	float	_mouseSensitivity;
+	float	_gravity;
+	Vector3	_velocity;
+	bool	_isGrounded;
 
 	float	_playerWidth;
 	float	_playerHeight;
