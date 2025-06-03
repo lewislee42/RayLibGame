@@ -1,12 +1,80 @@
 
 #include <raylib.h>
 #include <string>
-#include <raymath.h>
-#include <vector>
+#include <iostream>
 
 #include <Player.h>
+#include <ObjectsManager.h>
+
+#include <cstdlib>
 
 
+/* ---------------- PRINTING OUT UI ---------------- */
+void	DrawVector(std::string text, const Vector3 &vec, const uint &x, const uint &y) {
+	text += ": x " + std::to_string(vec.x);
+	text += ", y " + std::to_string(vec.y);
+	text += ", z " + std::to_string(vec.z);
+	DrawText(text.c_str(), x, y, 10, BLACK);
+}
+
+void	DrawUI(const Player &player) {
+	DrawFPS(10, 10);
+	DrawVector("position", player.camera.position, 10, 40);
+	DrawVector("target", player.camera.target, 10, 50);
+}
+
+
+/* ---------------- GENERATING WORLD ---------------- */
+Color	randomColor() {
+	float n = ((double)rand() / (double(RAND_MAX) + 1));
+
+	if (n < 0.1)
+		return RED;
+	else if (n < 0.2)
+		return GREEN;
+	else if (n < 0.3)
+		return BLUE;
+	else if (n < 0.4)
+		return GOLD;
+	else if (n < 0.5)
+		return BROWN;
+	else if (n < 0.6)
+		return VIOLET;
+	else if (n < 0.7)
+		return PINK;
+	else if (n < 0.8)
+		return LIME;
+	else if (n < 0.9)
+		return DARKBLUE;
+	else
+		return BLACK;
+}
+
+void	generateRandomBlocks(ObjectsManager &objectsManager) {
+	for (int i = 0; i < 100; i++) {
+		float width = 1 + (5 - 1) * ((double)rand() / (double(RAND_MAX) + 1));
+		float height = 1 + (5 - 1) * ((double)rand() / (double(RAND_MAX) + 1));
+		float length = 1 + (5 - 1) * ((double)rand() / (double(RAND_MAX) + 1));
+
+		float x = -50 + (50 - -50) * ((double)rand() / (double(RAND_MAX) + 1)); // the -+ 50 is to keep it within the red platform
+		float y = 5 * ((double)rand() / (double(RAND_MAX) + 1));
+		float z = -50 + (50 - -50) * ((double)rand() / (double(RAND_MAX) + 1));
+		
+		Color color = randomColor();
+		
+		objectsManager.objects.push_back(
+			new Object(
+				LoadModelFromMesh(GenMeshCube(width, height, length)),
+				Vector3{x, y, z},
+				color,
+				1
+			)
+		);
+	}
+}
+
+
+/* ---------------- MAIN LOOP ---------------- */
 int main() {
 	// Initialization
 	int windowWidth = 1200;
@@ -15,11 +83,19 @@ int main() {
 	InitWindow(windowWidth, windowHeight, "Testing window");
 
 	Player player;
+	ObjectsManager objectsManager;
 
-	std::vector <Model> objects;
-	std::vector <Vector3> objectsPos;
-	objects.push_back(LoadModelFromMesh(GenMeshCube(1, 1, 1)));
-	objectsPos.push_back(Vector3{1, 1, 1});
+	/* ---- GENERATES FLOOR ---- */
+	objectsManager.objects.push_back(
+		new Object(
+			LoadModelFromMesh(GenMeshCube(100, 1, 100)),
+			Vector3{0, 0, 0},
+			GRAY,
+			1
+		)
+	);
+	
+	generateRandomBlocks(objectsManager);
 
 	SetTargetFPS(120);
 	DisableCursor();
@@ -27,38 +103,25 @@ int main() {
 	while (!WindowShouldClose()) {
 
 		// Handles Input
-		
 		float dt = GetFrameTime();
-
-		player.updatePlayer(dt);
+		player.updatePlayer(dt, objectsManager);
 		
-
 		// Preps for Drawing
+		ClearBackground(WHITE);
 		BeginDrawing();
 
-		// Clears the screen to draw again
-		ClearBackground(WHITE);
-
-			BeginMode3D(player.camera);
+		BeginMode3D(player.camera);
 
 			// Draws
 			DrawGrid(100, 1);
-
-			for (int i = 0; i < (int)objects.size(); i++) {
-				DrawModel(objects[i], objectsPos[i], 1, RED);
-			}
+			objectsManager.renderObjects();
 
 		EndMode3D();
 
-		/* ----- Drawing UI ----- */
+		/* ---- Drawing UI ---- */
+		DrawUI(player);
 
-		DrawFPS(10, 10);
-		std::string position("position: x ");
-		position +=  std::to_string(player.camera.position.x) + ", y " + std::to_string(player.camera.position.y) + ", z " + std::to_string(player.camera.position.z);
-		DrawText(position.c_str(), 10, 30, 10, BLACK);
-		std::string target("target: x ");
-		target += std::to_string(player.camera.target.x) + ", y " + std::to_string(player.camera.target.y) + ", z " + std::to_string(player.camera.target.z);
-		DrawText(target.c_str(), 10, 40, 10, BLACK);
+
 		EndDrawing();
 	}
 
