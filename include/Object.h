@@ -7,7 +7,7 @@
 
 class Object {
 public:
-	Model		model;
+	Model		*model;
 	Vector3		position;
 	Color		color;
 	float		scale;
@@ -15,7 +15,7 @@ public:
 	BoundingBox	boundingBox;
 
 	Object(
-		const Model		&model,
+		Model			*model,
 		const Vector3	&position,
 		const Color		&color,
 		const float		&scale,

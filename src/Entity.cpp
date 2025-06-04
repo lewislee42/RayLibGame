@@ -4,7 +4,7 @@
 
 
 Entity::Entity(
-	const Model		&model,
+	Model			*model,
 	const Vector3	&position,
 	const Color		&color,
 	const float		&scale,

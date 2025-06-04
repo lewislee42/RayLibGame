@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <Player.h>
+#include <AssetsManager.h>
 #include <ObjectsManager.h>
 #include <Entity.h>
 
@@ -52,21 +53,29 @@ Color	randomColor() {
 		return BLACK;
 }
 
-void	generateRandomBlocks(ObjectsManager &objectsManager) {
+void	generateRandomBlocks(ObjectsManager &objectsManager, AssetsManager &assetsManager) {
 	for (int i = 0; i < 100; i++) {
-		float width = 1 + (5 - 1) * ((double)rand() / (double(RAND_MAX) + 1));
-		float height = 1 + (5 - 1) * ((double)rand() / (double(RAND_MAX) + 1));
-		float length = 1 + (5 - 1) * ((double)rand() / (double(RAND_MAX) + 1));
-
 		float x = -50 + (50 - -50) * ((double)rand() / (double(RAND_MAX) + 1)); // the -+ 50 is to keep it within the red platform
-		float y = 5 * ((double)rand() / (double(RAND_MAX) + 1));
 		float z = -50 + (50 - -50) * ((double)rand() / (double(RAND_MAX) + 1));
+		float y = 1;
+
+		float randomNumber = ((double)rand() / (double(RAND_MAX) + 1));
 		
 		Color color = randomColor();
+		Model *model = NULL;
+
+		if (randomNumber < 0.25)
+			model = &assetsManager.models["BLOCK_0"];
+		else if (randomNumber < 0.5)
+			model = &assetsManager.models["BLOCK_1"];
+		else if (randomNumber < 0.75)
+			model = &assetsManager.models["BLOCK_2"];
+		else
+			model = &assetsManager.models["BLOCK_3"];
 		
 		objectsManager.objects.push_back(
 			new Object(
-				LoadModelFromMesh(GenMeshCube(width, height, length)),
+				model,
 				Vector3{x, y, z},
 				color,
 				1,
@@ -86,12 +95,13 @@ int main() {
 	InitWindow(windowWidth, windowHeight, "Testing window");
 
 	Player player;
+	AssetsManager assetsManager;
 	ObjectsManager objectsManager;
 
 	/* ---- GENERATES FLOOR ---- */
 	objectsManager.objects.push_back(
 		new Object(
-			LoadModelFromMesh(GenMeshCube(100, 1, 100)),
+			&assetsManager.models["GROUND"],
 			Vector3{0, 0, 0},
 			GRAY,
 			1,
@@ -99,7 +109,7 @@ int main() {
 		)
 	);
 	
-	generateRandomBlocks(objectsManager);
+	generateRandomBlocks(objectsManager, assetsManager);
 
 	SetTargetFPS(120);
 	DisableCursor();
@@ -112,10 +122,6 @@ int main() {
 
 		// tmep code
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-			float width = 0.1f;
-			float height = 0.1f;
-			float length = 0.1f;
-
 			float x = player.camera.position.x;
 			float y = player.camera.position.y;
 			float z = player.camera.position.z;
@@ -123,7 +129,7 @@ int main() {
 			Color color = randomColor();
 
 			Entity* entity = new Entity(
-				LoadModelFromMesh(GenMeshCube(width, height, length)),
+				&assetsManager.models["BULLET"],
 				Vector3{x, y, z},
 				color,
 				1,
