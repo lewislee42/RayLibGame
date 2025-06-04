@@ -11,9 +11,16 @@ public:
 	Vector3		position;
 	Color		color;
 	float		scale;
+	Vector3		direction;
 	BoundingBox	boundingBox;
 
-	Object(const Model &model, const Vector3 &position, const Color &color, const float &scale);
+	Object(
+		const Model		&model,
+		const Vector3	&position,
+		const Color		&color,
+		const float		&scale,
+		const Vector3	&direction
+	);
 	~Object();
 };
 

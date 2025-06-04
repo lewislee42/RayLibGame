@@ -5,6 +5,7 @@
 
 #include <Player.h>
 #include <ObjectsManager.h>
+#include <Entity.h>
 
 #include <cstdlib>
 
@@ -68,7 +69,8 @@ void	generateRandomBlocks(ObjectsManager &objectsManager) {
 				LoadModelFromMesh(GenMeshCube(width, height, length)),
 				Vector3{x, y, z},
 				color,
-				1
+				1,
+				Vector3{0.0f, 0.0f, 1.0f}
 			)
 		);
 	}
@@ -92,7 +94,8 @@ int main() {
 			LoadModelFromMesh(GenMeshCube(100, 1, 100)),
 			Vector3{0, 0, 0},
 			GRAY,
-			1
+			1,
+			Vector3{0.0f, 0.0f, 1.0f}
 		)
 	);
 	
@@ -106,6 +109,32 @@ int main() {
 		// Handles Input
 		float dt = GetFrameTime();
 		player.updatePlayer(dt, objectsManager);
+
+		// tmep code
+		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+			float width = 0.1f;
+			float height = 0.1f;
+			float length = 0.1f;
+
+			float x = player.camera.position.x;
+			float y = player.camera.position.y;
+			float z = player.camera.position.z;
+			
+			Color color = randomColor();
+
+			Entity* entity = new Entity(
+				LoadModelFromMesh(GenMeshCube(width, height, length)),
+				Vector3{x, y, z},
+				color,
+				1,
+				Vector3Subtract(player.camera.target, player.camera.position),
+				Vector3Normalize(Vector3Subtract(player.camera.target, player.camera.position)),
+				5
+			);
+			objectsManager.entities.push_back(entity);
+		}
+
+		objectsManager.updateEntities(dt);
 		
 		// Preps for Drawing
 		ClearBackground(WHITE);
@@ -114,8 +143,8 @@ int main() {
 		BeginMode3D(player.camera);
 
 			// Draws
-			/*DrawGrid(100, 1);*/
 			objectsManager.renderObjects();
+			objectsManager.renderEntities();
 
 		EndMode3D();
 

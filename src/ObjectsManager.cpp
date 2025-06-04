@@ -26,3 +26,14 @@ bool	ObjectsManager::collisionCheck(const BoundingBox &boundingBox) const {
 	}
 	return false;
 }
+
+void	ObjectsManager::updateEntities(float deltaTime) {
+	for (uint i = 0; i < entities.size(); i++) {
+		if (entities[i]->lifetime - deltaTime <= 0) {
+			entities.erase(entities.begin() + i); // removing it for now
+			break;
+		}
+		entities[i]->position = Vector3Add(entities[i]->position, Vector3Scale(entities[i]->velocity, deltaTime));
+		entities[i]->lifetime -= deltaTime;
+	}
+}

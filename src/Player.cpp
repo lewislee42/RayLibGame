@@ -35,12 +35,14 @@ Player::Player() {
 	this->_playerSpeed = 9.0f;
 	this->_velocity = Vector3{0.0f, 0.0f, 0.0f};
 	this->_isGrounded = false;
-	this->_gravity = -9.3;
+	this->_gravity = -15;
 	
 }
 
+
 Player::~Player() {	
 }
+
 
 Vector3	Player::_calculateNewPosition(const float &deltaTime, const Vector3 &currentDirection) {
 	Vector3 forward = currentDirection;
@@ -86,6 +88,7 @@ Vector3	Player::_calculateNewPosition(const float &deltaTime, const Vector3 &cur
 	return Vector3Add(camera.position, Vector3Scale(_velocity, deltaTime));
 }
 
+
 void	Player::_updateDirection(const Vector3 &currentDirection) {
 	Vector2 mouseDelta = GetMouseDelta();
     Vector3 currentLookDirection = Vector3Normalize(currentDirection);
@@ -102,7 +105,6 @@ void	Player::_updateDirection(const Vector3 &currentDirection) {
 	currentLookDirection = Vector3Normalize(currentLookDirection);
 	camera.target = Vector3Add(camera.position, currentLookDirection);
 }
-
 
 
 /*
@@ -128,6 +130,7 @@ void	Player::updatePlayer(const float &deltaTime, const ObjectsManager &objectsM
 			}
 		};
 		Vector3 tempPosition = newPosition;
+
 		if (i & 1) {
 			newBoundingBox.min.x = camera.position.x - _playerWidth / 2;
 			newBoundingBox.max.x = camera.position.x + _playerWidth / 2;
