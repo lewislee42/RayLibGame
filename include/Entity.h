@@ -12,7 +12,7 @@ public:
 	float	lifetime;
 
 	Entity(
-		Model			*model,
+		const Model		&model,
 		const Vector3	&position,
 		const Color		&color,
 		const float		&scale,
@@ -22,6 +22,8 @@ public:
 	);
 
 	~Entity();
+
+	void	updateBoundingBox();
 };
 
 #endif /* ENTITY_CLASS_H */

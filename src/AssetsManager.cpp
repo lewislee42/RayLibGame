@@ -31,5 +31,6 @@ AssetsManager::~AssetsManager() {
 	// unloads models
 	for (std::map<std::string, Model>::iterator i = models.begin(); i != models.end(); i++) {
 		UnloadModel(i->second);
+		std::cout << "INFO: Unloaded model: " << i->first << std::endl;
 	}
 }

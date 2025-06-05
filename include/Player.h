@@ -5,6 +5,7 @@
 # include <raymath.h>
 
 class ObjectsManager;
+class AssetsManager;
 
 class Player {
 public:
@@ -14,7 +15,7 @@ public:
 	Player();
 	~Player();
 
-	void	updatePlayer(const float &deltaTime, const ObjectsManager& objectsManager);
+	void	updatePlayer(const float &deltaTime, ObjectsManager &objectsManager, AssetsManager &assetsManager);
 	Vector3	getVelocity() const;
 
 private:
@@ -29,7 +30,9 @@ private:
 	float	_playerDepth;
 
 	void	_updateDirection(const Vector3 &currentDirection);
+	void	_updatePosition(const Vector3 &newPosition, const ObjectsManager &objectsManager);
 	Vector3	_calculateNewPosition(const float &deltaTime, const Vector3 &currentDirection);
+	void	_handleShooting(ObjectsManager &objectsManager, AssetsManager &assetsManager);
 };
 
 #endif /* PLAYER_CLASS_H */

@@ -7,15 +7,16 @@
 
 class Object {
 public:
-	Model		*model;
+	Model		model;
 	Vector3		position;
 	Color		color;
 	float		scale;
 	Vector3		direction;
-	BoundingBox	boundingBox;
+	BoundingBox	boundingBoxMS;	// model space
+	BoundingBox	boundingBoxWS;	// world space
 
 	Object(
-		Model			*model,
+		const Model		&model,
 		const Vector3	&position,
 		const Color		&color,
 		const float		&scale,

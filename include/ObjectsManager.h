@@ -18,8 +18,10 @@ public:
 
 	void	renderObjects() const;	
 	void	renderEntities() const;	
+
 	bool	collisionCheck(const BoundingBox &boundingBox) const;
 	void	updateEntities(const float deltaTime);
+
 };
 
 #endif /* OBJECTS_MANAGER_CLASS_H */

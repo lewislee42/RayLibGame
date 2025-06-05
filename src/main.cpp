@@ -62,20 +62,21 @@ void	generateRandomBlocks(ObjectsManager &objectsManager, AssetsManager &assetsM
 		float randomNumber = ((double)rand() / (double(RAND_MAX) + 1));
 		
 		Color color = randomColor();
-		Model *model = NULL;
+		std::string assetName;
 
 		if (randomNumber < 0.25)
-			model = &assetsManager.models["BLOCK_0"];
+			assetName = "BLOCK_0";
 		else if (randomNumber < 0.5)
-			model = &assetsManager.models["BLOCK_1"];
+			assetName = "BLOCK_1";
 		else if (randomNumber < 0.75)
-			model = &assetsManager.models["BLOCK_2"];
+			assetName = "BLOCK_2";
 		else
-			model = &assetsManager.models["BLOCK_3"];
+			assetName = "BLOCK_3";
+
 		
 		objectsManager.objects.push_back(
 			new Object(
-				model,
+				assetsManager.models[assetName],
 				Vector3{x, y, z},
 				color,
 				1,
@@ -101,7 +102,7 @@ int main() {
 	/* ---- GENERATES FLOOR ---- */
 	objectsManager.objects.push_back(
 		new Object(
-			&assetsManager.models["GROUND"],
+			assetsManager.models["GROUND"],
 			Vector3{0, 0, 0},
 			GRAY,
 			1,
@@ -118,27 +119,7 @@ int main() {
 
 		// Handles Input
 		float dt = GetFrameTime();
-		player.updatePlayer(dt, objectsManager);
-
-		// tmep code
-		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-			float x = player.camera.position.x;
-			float y = player.camera.position.y;
-			float z = player.camera.position.z;
-			
-			Color color = randomColor();
-
-			Entity* entity = new Entity(
-				&assetsManager.models["BULLET"],
-				Vector3{x, y, z},
-				color,
-				1,
-				Vector3Subtract(player.camera.target, player.camera.position),
-				Vector3Normalize(Vector3Subtract(player.camera.target, player.camera.position)),
-				5
-			);
-			objectsManager.entities.push_back(entity);
-		}
+		player.updatePlayer(dt, objectsManager, assetsManager);
 
 		objectsManager.updateEntities(dt);
 		

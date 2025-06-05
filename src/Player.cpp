@@ -2,12 +2,13 @@
 
 #include <Player.h>
 #include <ObjectsManager.h>
+#include <AssetsManager.h>
 
 Player::Player() {
 
 	/* ---- Setting up camera ---- */
 	this->camera			= Camera3D();
-	this->camera.position	= Vector3{0.0f, 1.1f, 0.0f};
+	this->camera.position	= Vector3{0.0f, 5.1f, 0.0f};
 	this->camera.target		= Vector3{0.0f, 0.0f, 1.0f};
 	this->camera.up			= Vector3{0.0f, 1.0f, 0.0f};
 	this->camera.fovy		= 60.0f;
@@ -33,7 +34,7 @@ Player::Player() {
 	/* ---- Setting up misc ---- */
 	this->_mouseSensitivity = 0.4f;
 	this->_playerSpeed = 9.0f;
-	this->_velocity = Vector3{0.0f, 0.0f, 0.0f};
+	this->_velocity = Vector3{0.0f, -1.0f, 0.0f};
 	this->_isGrounded = false;
 	this->_gravity = -15;
 	
@@ -106,16 +107,7 @@ void	Player::_updateDirection(const Vector3 &currentDirection) {
 	camera.target = Vector3Add(camera.position, currentLookDirection);
 }
 
-
-/*
-*	This function handles Player movement and direction 
-*/
-void	Player::updatePlayer(const float &deltaTime, const ObjectsManager &objectsManager) {
-	Vector3 currentLookDirection = Vector3Subtract(camera.target, camera.position);
-
-	Vector3 newPosition = _calculateNewPosition(deltaTime, currentLookDirection);
-
-	/* ---- COLLISION CHECKER ---- */
+void	Player::_updatePosition(const Vector3 &newPosition, const ObjectsManager &objectsManager) {
 	for (int i = 0; i < 8; i++) {
 		BoundingBox newBoundingBox = {
 			.min = {
@@ -129,6 +121,7 @@ void	Player::updatePlayer(const float &deltaTime, const ObjectsManager &objectsM
 				newPosition.z + _playerDepth / 2
 			}
 		};
+
 		Vector3 tempPosition = newPosition;
 
 		if (i & 1) {
@@ -137,16 +130,15 @@ void	Player::updatePlayer(const float &deltaTime, const ObjectsManager &objectsM
 			tempPosition.x = camera.position.x;
 		}
 		if (i & 2) {
-			newBoundingBox.min.y = camera.position.y - _playerHeight / 2;
-			newBoundingBox.max.y = camera.position.y + _playerHeight / 2;
-			tempPosition.y = camera.position.y;
-		}
-		if (i & 4) {
 			newBoundingBox.min.z = camera.position.z - _playerDepth / 2;
 			newBoundingBox.max.z = camera.position.z + _playerDepth / 2;
 			tempPosition.z = camera.position.z;
 		}
-
+		if (i & 4) {
+			newBoundingBox.min.y = camera.position.y - _playerHeight / 2;
+			newBoundingBox.max.y = camera.position.y + _playerHeight / 2;
+			tempPosition.y = camera.position.y;
+		}
 
 		if (!objectsManager.collisionCheck(newBoundingBox)) {
 			if (tempPosition.y == camera.position.y) {
@@ -158,10 +150,40 @@ void	Player::updatePlayer(const float &deltaTime, const ObjectsManager &objectsM
 			break;
 		}
 	}
+}
+
+void	Player::_handleShooting(ObjectsManager &objectsManager, AssetsManager &assetsManager) {
+	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+		Vector3 direction = Vector3Subtract(camera.target, camera.position);
+
+		Entity* entity = new Entity(
+			assetsManager.models["BULLET"],
+			Vector3{camera.position.x, camera.position.y, camera.position.z},
+			BLACK,
+			1,
+			Vector3Scale(direction, 5.0f),
+			Vector3Normalize(direction),
+			5
+		);
+		objectsManager.entities.push_back(entity);
+	}
+}
+
+/*
+*	This function handles general player input 
+*/
+void	Player::updatePlayer(const float &deltaTime, ObjectsManager &objectsManager, AssetsManager &assetsManager) {
+	Vector3 currentLookDirection = Vector3Subtract(camera.target, camera.position);
+
+	Vector3 newPosition = _calculateNewPosition(deltaTime, currentLookDirection);
+
+	/* ---- Checks & update position ---- */
+	_updatePosition(newPosition, objectsManager);
 
 	/* ---- Update direction ---- */
-	this->_updateDirection(currentLookDirection);
+	_updateDirection(currentLookDirection);
 
+	_handleShooting(objectsManager, assetsManager);
 }
 
 Vector3	Player::getVelocity() const {

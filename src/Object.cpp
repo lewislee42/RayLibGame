@@ -1,10 +1,12 @@
 
+#include "raylib.h"
 # include <Object.h>
 
+#include <cmath>
 #include <iostream>
 
 Object::Object(
-	Model			*model,
+	const Model		&model,
 	const Vector3	&position,
 	const Color		&color,
 	const float		&scale,
@@ -13,22 +15,30 @@ Object::Object(
 	position(position),
 	color(color),
 	scale(scale),
-	direction(direction),
-	boundingBox(GetMeshBoundingBox(model->meshes[0]))
+	direction(direction)
 {
-	boundingBox = {
-		.min = Vector3Add(boundingBox.min, position),
-		.max = Vector3Add(boundingBox.max, position)
+	boundingBoxMS = GetMeshBoundingBox(model.meshes[0]);
+
+	for (int i = 1; i < model.meshCount; i++) {
+		BoundingBox meshBoundingBox = GetMeshBoundingBox(model.meshes[i]);
+
+		boundingBoxMS.min.x = fminf(boundingBoxMS.min.x, meshBoundingBox.min.x);
+		boundingBoxMS.min.y = fminf(boundingBoxMS.min.y, meshBoundingBox.min.y);
+		boundingBoxMS.min.z = fminf(boundingBoxMS.min.z, meshBoundingBox.min.z);
+
+
+		boundingBoxMS.max.x = fminf(boundingBoxMS.max.x, meshBoundingBox.max.x);
+		boundingBoxMS.max.y = fminf(boundingBoxMS.max.y, meshBoundingBox.max.y);
+		boundingBoxMS.max.z = fminf(boundingBoxMS.max.z, meshBoundingBox.max.z);
+	}
+
+	boundingBoxWS = {
+		.min = Vector3Add(boundingBoxMS.min, position),
+		.max = Vector3Add(boundingBoxMS.max, position)
 	};
-
-
-	/*std::cout << "direction: x " << direction.x << ", y " << direction.y << ", z " << direction.z << std::endl;*/
-	/*float pitch = asin(-direction.y);*/
-	/*float yaw = atan2(direction.x, direction.z);*/
-	/*std::cout << "pitch: " << (pitch) << ", yaw:" << (yaw ) <<  std::endl;*/
-	/*this->model->transform = MatrixRotateXYZ((Vector3){ 0, yaw, 0 });*/
 }
 
+
+
 Object::~Object() {
-	/*UnloadModel(model);*/
 }
