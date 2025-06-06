@@ -2,15 +2,14 @@
 #ifndef OBJECT_CLASS_H
 # define OBJECT_CLASS_H
 
-# include <raylib.h>
-# include <raymath.h>
+# include <raylib/raylib.h>
+# include <raylib/raymath.h>
 
 class Object {
 public:
 	Model		model;
 	Vector3		position;
 	Color		color;
-	float		scale;
 	Vector3		direction;
 	BoundingBox	boundingBoxMS;	// model space
 	BoundingBox	boundingBoxWS;	// world space
@@ -19,7 +18,6 @@ public:
 		const Model		&model,
 		const Vector3	&position,
 		const Color		&color,
-		const float		&scale,
 		const Vector3	&direction
 	);
 	~Object();

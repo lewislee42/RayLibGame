@@ -160,10 +160,10 @@ void	Player::_handleShooting(ObjectsManager &objectsManager, AssetsManager &asse
 			assetsManager.models["BULLET"],
 			Vector3{camera.position.x, camera.position.y, camera.position.z},
 			BLACK,
-			1,
 			Vector3Scale(direction, 5.0f),
 			Vector3Normalize(direction),
-			5
+			5,
+			true
 		);
 		objectsManager.entities.push_back(entity);
 	}

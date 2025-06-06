@@ -8,13 +8,14 @@ Entity::Entity(
 	const Model		&model,
 	const Vector3	&position,
 	const Color		&color,
-	const float		&scale,
 	const Vector3	&velocity,
 	const Vector3	&direction,
-	const float		&lifetime
-):	Object(model, position, color, scale, direction),
+	const float		&lifetime,
+	const bool		&removeOnCollision
+):	Object(model, position, color, direction),
 	velocity(velocity),
-	lifetime(lifetime)
+	lifetime(lifetime),
+	removeOnCollision(removeOnCollision)
 {
 	
 	float pitch = asin(-direction.y);

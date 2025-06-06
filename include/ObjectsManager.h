@@ -3,7 +3,7 @@
 #ifndef OBJECTS_MANAGER_CLASS_H 
 # define OBJECTS_MANAGER_CLASS_H 
 
-# include <raylib.h>
+# include <raylib/raylib.h>
 # include <vector>
 # include <Object.h>
 # include <Entity.h>

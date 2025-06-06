@@ -1,6 +1,6 @@
 NAME = RayLibGame 
 SRC_DIR = src
-SRC_FILES = main.cpp Player.cpp Object.cpp ObjectsManager.cpp Entity.cpp AssetsManager.cpp
+SRC_FILES = main.cpp Player.cpp Object.cpp ObjectsManager.cpp Entity.cpp AssetsManager.cpp Game.cpp
 HEADER_DIR = include
 OBJ_DIR = obj
 

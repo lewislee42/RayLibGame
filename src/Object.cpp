@@ -1,5 +1,4 @@
 
-#include "raylib.h"
 # include <Object.h>
 
 #include <cmath>
@@ -9,12 +8,10 @@ Object::Object(
 	const Model		&model,
 	const Vector3	&position,
 	const Color		&color,
-	const float		&scale,
 	const Vector3	&direction
 ):	model(model),
 	position(position),
 	color(color),
-	scale(scale),
 	direction(direction)
 {
 	boundingBoxMS = GetMeshBoundingBox(model.meshes[0]);
