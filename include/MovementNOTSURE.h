@@ -10,7 +10,6 @@
 # include <Collision.h>
 
 void	ApplyGravity(entt::registry &registry, const float &deltaTime);
-void	UpdatePosition(entt::registry &registry, const float &deltaTime);
 
 #endif /* MOVEMENT_H */
 
