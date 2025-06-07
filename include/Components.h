@@ -6,20 +6,14 @@
 
 struct Position {
 	Vector3 position;
-
-	operator Vector3 &() { return position; }
 };
 
 struct Velocity {
 	Vector3 velocity;
-
-	operator Vector3 &() { return velocity; }
 };
 
 struct Direction {
 	Vector3 direction;
-
-	operator Vector3 &() { return direction; }
 };
 
 struct CameraComponent {
@@ -41,23 +35,17 @@ struct CameraComponent {
 		camera.fovy			= 60.0f;
 		camera.projection	= CAMERA_PERSPECTIVE;
 	};
-
-	operator Camera3D &() { return camera; }
 };
 
-struct CollisionBox {
+struct BoundingBoxComponent {
 	BoundingBox boundingBox;
-
-	operator BoundingBox &() { return boundingBox; }
 };
 
 struct Speed {
 	float speed;
-	
-	operator float &() { return speed; }
 };
 
-struct Size {
+struct Dimensions {
 	float width;
 	float height;
 	float depth;
@@ -65,26 +53,28 @@ struct Size {
 
 struct MouseInput {
 	float mouseSensitivity;
-
-	operator float &() { return mouseSensitivity; }
 };
 
 struct IsGrounded {
 	bool	isGrounded;
-
-	operator bool &() { return isGrounded; }
 };
 
 struct Gravity {
 	float	gravity;
-
-	operator float &() { return gravity; }
 };
 
-struct KeyboardInputTag {};
+struct ModelComponent {
+	Model	model;
+};
+
+struct ColorComponent {
+	Color	color;
+};
+
 
 
 struct PlayerTag {};
+struct ObjectTag {};
 /*struct BulletTag {};   // Empty tag*/
 /*struct EnemyTag {};    // Another tag*/
 
