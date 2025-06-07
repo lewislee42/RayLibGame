@@ -3,6 +3,11 @@
 # define COMPONENTS_H 
 
 # include <raylib/raylib.h>
+# include <entt/entt.hpp>
+
+enum WeaponEnum {
+	ROCKET_LAUNCHER = 0
+};
 
 struct Position {
 	Vector3 position;
@@ -71,12 +76,21 @@ struct ColorComponent {
 	Color	color;
 };
 
+struct Lifetime {
+	float	lifetime;
+};
 
+struct WeaponComponent {
+	WeaponEnum weaponType;
+};
+
+struct EquippedWeapon {
+    entt::entity weaponEntity;
+};
 
 struct PlayerTag {};
 struct ObjectTag {};
-/*struct BulletTag {};   // Empty tag*/
-/*struct EnemyTag {};    // Another tag*/
+struct RocketTag {};
 
 #endif /* COMPONENTS_H */
 

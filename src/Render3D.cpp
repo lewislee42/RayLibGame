@@ -4,7 +4,7 @@
 
 
 void	RenderObjects(entt::registry &registry) {
-	auto view = registry.view<ObjectTag, ModelComponent, Position, ColorComponent>();
+	auto view = registry.view<ModelComponent, Position, ColorComponent>();
 	for (auto& entity: view) {
 		Model &model = registry.get<ModelComponent>(entity).model;
 		Vector3 &position = registry.get<Position>(entity).position;

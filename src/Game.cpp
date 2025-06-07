@@ -1,17 +1,20 @@
 
 
+#include "Components.h"
+#include "RocketSystem.h"
 #include <Game.h>
 #include <AssetsManager.h>
 
 
 Game::Game(): assetsManager() {
 
-
-	InitPlayer();
 	InitScene();
+	InitWeapons();
+	InitPlayer();
 }
 
-Game::~Game() {}
+Game::~Game() {
+}
 
 
 
@@ -51,10 +54,9 @@ void	Game::Run() {
 
 		// Handles Input
 		float dt = GetFrameTime();
-		HandlePlayerKeyboardInput(registry);
-		ApplyGravity(registry, dt);
-		UpdatePosition(registry, dt);
-		HandlePlayerMouseInput(registry);
+		PlayerSystem(registry, dt, assetsManager);
+		RocketSystem(registry, dt);
+		
 
 		/*objectsManager.updateEntities(dt);*/
 		
@@ -101,6 +103,9 @@ void	Game::InitPlayer() {
 			playerCamera.camera.position.z + playerSize.depth / 2
 		}
 	});
+	auto view = registry.view<WeaponComponent>();
+	entt::entity weapon = *view.begin();
+	registry.emplace<EquippedWeapon>(player, weapon);
 	registry.emplace<PlayerTag>(player);
 }
 
@@ -130,7 +135,6 @@ void	Game::InitScene() {
 		.min = Vector3Add(floorBoundingBox.min, position),
 		.max = Vector3Add(floorBoundingBox.max, position)
 	};
-	/*registry.emplace<BoundingBoxMS>(floor, floorBoundingBox);*/
 	registry.emplace<BoundingBoxComponent>(floor, floorBoundingBoxWS);
 	registry.emplace<ObjectTag>(floor);
 	
@@ -185,9 +189,14 @@ void	Game::InitScene() {
 			boundingBox.max.y - boundingBox.min.y, 
 			boundingBox.max.z - boundingBox.min.z
 		);
-		/*registry.emplace<BoundingBoxMS>(object, boundingBox);*/
 		registry.emplace<BoundingBoxComponent>(object, boundingBoxWS);
 		registry.emplace<ObjectTag>(object);
 	}
 }
 
+void	Game::InitWeapons() {
+	entt::entity rocketLauncher = registry.create();
+
+	registry.emplace<ModelComponent>(rocketLauncher, assetsManager.models["ROCKET_LAUNCHER"]);
+	registry.emplace<WeaponComponent>(rocketLauncher, ROCKET_LAUNCHER);
+}

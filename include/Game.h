@@ -7,8 +7,8 @@
 # include <Components.h>
 # include <entt/entt.hpp>
 
-# include <PlayerInput.h>
-# include <Movement.h>
+# include <PlayerSystem.h>
+/*# include <Movement.h>*/
 # include <Collision.h>
 # include <Render3D.h>
 # include <RenderUI.h>
@@ -26,6 +26,7 @@ private:
 
 	void	InitPlayer();
 	void	InitScene();
+	void	InitWeapons();
 };
 
 #endif /* GAME_CLASS_H */
