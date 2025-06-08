@@ -157,8 +157,11 @@ brew install make
 [license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/linkedin_username
-[game-video]: https://github.com/user-attachments/assets/be99a9f1-ad9a-422f-84bf-18a950abd7c4
+[game-video]: https://github.com/user-attachments/assets/37920c99-0dc6-46ef-8a68-8e5f40b20d4a
 [C++]: https://img.shields.io/badge/C++-%2300599C.svg?logo=c%2B%2B&logoColor=white
 [C++-url]: #
 [RayLib]: https://img.shields.io/badge/RAYLIB-FFFFFF?style=for-the-badge&logo=raylib&logoColor=black
 [Raylib-url]: https://www.raylib.com
+
+
+
