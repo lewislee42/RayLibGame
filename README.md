@@ -64,8 +64,9 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+### Showcase Video
 
-[Product Name Screen Shot][game-video]
+[GameVideo][game-video]
 
 The idea for this project is to build a game that utilizes rocket jumping as a game mechanic to build a arcade shooter like doom or ultrakill.
 Development is still on-going with implementation of a ECS(Entity Component System) as well, but i still have much to learn XD.
