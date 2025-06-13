@@ -13,8 +13,9 @@ struct Position {
 	Vector3 position;
 };
 
-struct Velocity {
+struct Movement {
 	Vector3 velocity;
+	float	speed;
 };
 
 struct Direction {
@@ -43,21 +44,17 @@ struct CameraComponent {
 };
 
 struct BoundingBoxComponent {
-	BoundingBox boundingBox;
-};
-
-struct Speed {
-	float speed;
+	BoundingBox	boundingBox;
 };
 
 struct Dimensions {
-	float width;
-	float height;
-	float depth;
+	float	width;
+	float	height;
+	float	depth;
 };
 
 struct MouseInput {
-	float mouseSensitivity;
+	float	mouseSensitivity;
 };
 
 struct IsGrounded {
@@ -70,27 +67,37 @@ struct Gravity {
 
 struct ModelComponent {
 	Model	model;
+	float	scale;
 };
 
 struct ColorComponent {
 	Color	color;
 };
 
+
 struct Lifetime {
 	float	lifetime;
 };
 
 struct WeaponComponent {
-	WeaponEnum weaponType;
+	WeaponEnum	weaponType;
+	float		firerate;
+	float		firerateCooldown;
+	int			ammo;	// not used yet
+};
+
+struct OwnedBy {
+	entt::entity owner;
 };
 
 struct EquippedWeapon {
-    entt::entity weaponEntity;
+    entt::entity	weaponEntity;
 };
 
-struct PlayerTag {};
-struct ObjectTag {};
-struct RocketTag {};
+struct PlayerTag	{};
+struct ObjectTag	{};
+struct RocketTag	{};
+struct FiringTag	{};
 
 #endif /* COMPONENTS_H */
 
