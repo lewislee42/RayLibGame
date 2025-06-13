@@ -77,7 +77,7 @@ void	Game::Run() {
 
 void	Game::InitPlayer() {
 	entt::entity player = registry.create();
-	registry.emplace<Movement>(player, Vector3{0.0f, 0.0f, 0.0f}, 9.0f);
+	registry.emplace<Movement>(player, Vector3{0.0f, -15.0f, 0.0f}, 9.0f);
 	registry.emplace<Direction>(player, Vector3{0.0f, 0.0f, 1.0f});
 	registry.emplace<CameraComponent>(player, Vector3{0.0f, 1.1f, 0.0f});
 	registry.emplace<MouseInput>(player, 0.4f);

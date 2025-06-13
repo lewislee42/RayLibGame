@@ -9,6 +9,7 @@ void	HandlePlayerKeyboardInput(entt::registry &registry, const entt::entity &pla
 	Movement& movement	= registry.get<Movement>(player);
 	Camera3D& camera	= registry.get<CameraComponent>(player).camera;
 	bool& isGrounded	= registry.get<IsGrounded>(player).isGrounded;
+	float& gravity		= registry.get<Gravity>(player).gravity;
 	Vector3& direction	= registry.get<Direction>(player).direction;
 
 	direction = Vector3Subtract(camera.target, camera.position);
@@ -43,7 +44,7 @@ void	HandlePlayerKeyboardInput(entt::registry &registry, const entt::entity &pla
 
 	/* ---- Handle jumping ---- */
 	if (IsKeyDown(KEY_SPACE) && isGrounded) {
-		movement.velocity.y += 5;
+		movement.velocity.y += gravity + 5;
 		isGrounded = false;
 	}
 }
@@ -94,12 +95,10 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 	newPosition = Vector3Add(camera.position, Vector3Scale(movement.velocity, deltaTime));
 
 	
-	IsGrounded *isGrounded		= registry.try_get<IsGrounded>(player);
-	Gravity *gravity			= registry.try_get<Gravity>(player);
-	if (isGrounded && gravity) {
-		if (isGrounded->isGrounded == false)
-			movement.velocity.y += -gravity->gravity * deltaTime;
-	}
+	bool &isGrounded	= registry.get<IsGrounded>(player).isGrounded;
+	float &gravity		= registry.get<Gravity>(player).gravity;
+	if (isGrounded == false && movement.velocity.y > -50.0f)
+		movement.velocity.y += -gravity * deltaTime;
 
 	Dimensions& dimensions						= registry.get<Dimensions>(player);
 	BoundingBoxComponent &boundingBoxComponent	= registry.get<BoundingBoxComponent>(player);
@@ -137,10 +136,9 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 
 		if (!CollisionCheck(newBoundingBox, player, registry)) {
 			if (tempPosition.y == currentPosition.y) {
-				IsGrounded *isGrounded = registry.try_get<IsGrounded>(player);
-				if (isGrounded)
-					isGrounded->isGrounded = true;
-				movement.velocity.y = 0;
+				isGrounded = true;
+				movement.velocity.y = -gravity;
+				
 			}
 			newPosition = tempPosition;
 			boundingBoxComponent.boundingBox = newBoundingBox;
