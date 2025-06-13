@@ -6,10 +6,10 @@
 void	RenderObjects(entt::registry &registry) {
 	auto view = registry.view<ModelComponent, Position, ColorComponent>();
 	for (auto& entity: view) {
-		Model &model = registry.get<ModelComponent>(entity).model;
-		Vector3 &position = registry.get<Position>(entity).position;
-		Color &color = registry.get<ColorComponent>(entity).color;
+		ModelComponent &model	= registry.get<ModelComponent>(entity);
+		Vector3 &position		= registry.get<Position>(entity).position;
+		Color &color			= registry.get<ColorComponent>(entity).color;
 
-		DrawModel(model, position, 1, color);
+		DrawModel(model.model, position, model.scale, color);
 	}
 }

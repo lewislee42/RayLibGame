@@ -1,9 +1,7 @@
 
 
-#include "Components.h"
-#include "RocketSystem.h"
 #include <Game.h>
-#include <AssetsManager.h>
+#include <iostream>
 
 
 Game::Game(): assetsManager() {
@@ -45,20 +43,18 @@ Color	randomColor() {
 }
 
 void	Game::Run() {
-
 	while (!WindowShouldClose()) {
-		auto view = registry.view<CameraComponent, Velocity>();
+		auto view = registry.view<CameraComponent>();
 		auto entity = *view.begin();
 		Camera3D &camera = registry.get<CameraComponent>(entity).camera;
-		Vector3 &velocity = registry.get<Velocity>(entity).velocity;
 
 		// Handles Input
 		float dt = GetFrameTime();
-		PlayerSystem(registry, dt, assetsManager);
-		RocketSystem(registry, dt);
+		PlayerSystem(registry, dt);
+		PlayerWeaponSystem(registry, dt, assetsManager);
+		RocketSystem(registry, dt, assetsManager);
 		
 
-		/*objectsManager.updateEntities(dt);*/
 		
 		// Preps for Drawing
 		ClearBackground(WHITE);
@@ -81,10 +77,9 @@ void	Game::Run() {
 
 void	Game::InitPlayer() {
 	entt::entity player = registry.create();
-	registry.emplace<Velocity>(player, Vector3{0.0f, 0.0f, 0.0f});
+	registry.emplace<Movement>(player, Vector3{0.0f, 0.0f, 0.0f}, 9.0f);
 	registry.emplace<Direction>(player, Vector3{0.0f, 0.0f, 1.0f});
 	registry.emplace<CameraComponent>(player, Vector3{0.0f, 1.1f, 0.0f});
-	registry.emplace<Speed>(player, 9.0f);
 	registry.emplace<MouseInput>(player, 0.4f);
 	registry.emplace<Gravity>(player, 15.0f);
 	registry.emplace<IsGrounded>(player, false);
@@ -106,12 +101,13 @@ void	Game::InitPlayer() {
 	auto view = registry.view<WeaponComponent>();
 	entt::entity weapon = *view.begin();
 	registry.emplace<EquippedWeapon>(player, weapon);
+	registry.emplace<OwnedBy>(weapon, player);
 	registry.emplace<PlayerTag>(player);
 }
 
 void	Game::InitScene() {
 	entt::entity floor = registry.create();
-	registry.emplace<ModelComponent>(floor, assetsManager.models["GROUND"]);
+	registry.emplace<ModelComponent>(floor, assetsManager.models["GROUND"], 1.0f);
 	registry.emplace<Position>(floor, Vector3{0.0f, 0.0f, 0.0f});
 	registry.emplace<ColorComponent>(floor, GRAY);
 	registry.emplace<Direction>(floor, Vector3{0.0f, 0.0f, 1.0f});
@@ -159,7 +155,7 @@ void	Game::InitScene() {
 			assetName = "BLOCK_3";
 
 		entt::entity object = registry.create();
-		registry.emplace<ModelComponent>(object, assetsManager.models[assetName]);
+		registry.emplace<ModelComponent>(object, assetsManager.models[assetName], 1.0f);
 		registry.emplace<Position>(object, Vector3{x, y, z});
 		registry.emplace<ColorComponent>(object, color);
 		registry.emplace<Direction>(object, Vector3{0.0f, 0.0f, 1.0f});
@@ -198,5 +194,5 @@ void	Game::InitWeapons() {
 	entt::entity rocketLauncher = registry.create();
 
 	registry.emplace<ModelComponent>(rocketLauncher, assetsManager.models["ROCKET_LAUNCHER"]);
-	registry.emplace<WeaponComponent>(rocketLauncher, ROCKET_LAUNCHER);
+	registry.emplace<WeaponComponent>(rocketLauncher, ROCKET_LAUNCHER, 0.8f, 0.0f);
 }

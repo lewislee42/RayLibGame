@@ -22,6 +22,7 @@ AssetsManager::AssetsManager() {
 	generateRandomBlocksModel(this);
 	models["ROCKET"] = LoadModelFromMesh(GenMeshCube(0.1f, 0.1f, 0.1f));
 	models["ROCKET_LAUNCHER"] = LoadModelFromMesh(GenMeshCube(0.2f, 0.2f, 0.5f));
+	models["ROCKET_EXPLOSION"] = LoadModelFromMesh(GenMeshSphere(1, 5, 5));
 
 	for (std::map<std::string, Model>::iterator i = models.begin(); i != models.end(); i++) {
 		std::cout << "INFO: Loaded model: " << i->first << std::endl;

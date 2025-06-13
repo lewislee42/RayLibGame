@@ -1,13 +1,13 @@
 
 
+#include "raylib/raylib.h"
 #include <PlayerSystem.h>
 
 
 # include <iostream>
 void	HandlePlayerKeyboardInput(entt::registry &registry, const entt::entity &player) {
-	Vector3& velocity	= registry.get<Velocity>(player).velocity;
+	Movement& movement	= registry.get<Movement>(player);
 	Camera3D& camera	= registry.get<CameraComponent>(player).camera;
-	float& speed		= registry.get<Speed>(player).speed;
 	bool& isGrounded	= registry.get<IsGrounded>(player).isGrounded;
 	Vector3& direction	= registry.get<Direction>(player).direction;
 
@@ -21,29 +21,29 @@ void	HandlePlayerKeyboardInput(entt::registry &registry, const entt::entity &pla
 		forward = Vector3{0.0f, 0.0f, 1.0f};
 	}
 
-	velocity.x = 0;
-	velocity.z = 0;
+	movement.velocity.x = 0;
+	movement.velocity.z = 0;
 
 	Vector3 right = Vector3CrossProduct(forward, camera.up);
 	right = Vector3Normalize(right);
 
 	/* ---- Handle WASD ---- */
 	if (IsKeyDown(KEY_W)) {
-		velocity = Vector3Add(velocity, Vector3Scale(forward, speed));
+		movement.velocity = Vector3Add(movement.velocity, Vector3Scale(forward, movement.speed));
 	}
 	if (IsKeyDown(KEY_S)) {
-		velocity = Vector3Subtract(velocity, Vector3Scale(forward, speed));
+		movement.velocity = Vector3Subtract(movement.velocity, Vector3Scale(forward, movement.speed));
 	}
 	if (IsKeyDown(KEY_D)) {
-		velocity = Vector3Add(velocity, Vector3Scale(right, speed));
+		movement.velocity = Vector3Add(movement.velocity, Vector3Scale(right, movement.speed));
 	}
 	if (IsKeyDown(KEY_A)) {
-		velocity = Vector3Subtract(velocity, Vector3Scale(right, speed));
+		movement.velocity = Vector3Subtract(movement.velocity, Vector3Scale(right, movement.speed));
 	}
 
 	/* ---- Handle jumping ---- */
 	if (IsKeyDown(KEY_SPACE) && isGrounded) {
-		velocity.y += 5;
+		movement.velocity.y += 5;
 		isGrounded = false;
 	}
 }
@@ -69,21 +69,14 @@ void	HandlePlayerMouseDirectionInput(entt::registry &registry, const entt::entit
 	camera.target = Vector3Add(camera.position, currentLookDirection);
 }
 
-void	HandlePlayerMouseClickingInput(entt::registry &registry, const entt::entity &player, AssetsManager &assetsManager) {
+void	HandlePlayerMouseClickingInput(entt::registry &registry, const entt::entity &player) {
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-		auto view = registry.view<EquippedWeapon>();
-		for (auto &entity : view) {
-			entt::entity weaponId = registry.get<EquippedWeapon>(entity).weaponEntity;
-			if (!registry.valid(weaponId))
-				continue ;
-
-			WeaponEnum &weaponType = registry.get<WeaponComponent>(weaponId).weaponType;
-
-			switch (weaponType) {
-				case ROCKET_LAUNCHER:
-					SpawnRocket(registry, player, assetsManager);
-					break;
-			}
+		if (!registry.all_of<FiringTag>(player)) {
+			registry.emplace<FiringTag>(player);
+		}
+	} else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+		if (registry.all_of<FiringTag>(player)) {
+			registry.erase<FiringTag>(player);
 		}
 	}
 }
@@ -91,21 +84,21 @@ void	HandlePlayerMouseClickingInput(entt::registry &registry, const entt::entity
 void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, const float &deltaTime) {
 	Vector3 newPosition;
 	Vector3 currentPosition;
-	Vector3& velocity			= registry.get<Velocity>(player).velocity;
-	if (velocity.x == 0 && velocity.y == 0 && velocity.z == 0)
+	Movement& movement			= registry.get<Movement>(player);
+	if (movement.velocity.x == 0 && movement.velocity.y == 0 && movement.velocity.z == 0)
 		return ;
 
 
 	Camera3D &camera			= registry.get<CameraComponent>(player).camera;
 	currentPosition = camera.position;
-	newPosition = Vector3Add(camera.position, Vector3Scale(velocity, deltaTime));
+	newPosition = Vector3Add(camera.position, Vector3Scale(movement.velocity, deltaTime));
 
 	
 	IsGrounded *isGrounded		= registry.try_get<IsGrounded>(player);
 	Gravity *gravity			= registry.try_get<Gravity>(player);
 	if (isGrounded && gravity) {
 		if (isGrounded->isGrounded == false)
-			velocity.y += -gravity->gravity * deltaTime;
+			movement.velocity.y += -gravity->gravity * deltaTime;
 	}
 
 	Dimensions& dimensions						= registry.get<Dimensions>(player);
@@ -147,7 +140,7 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 				IsGrounded *isGrounded = registry.try_get<IsGrounded>(player);
 				if (isGrounded)
 					isGrounded->isGrounded = true;
-				velocity.y = 0;
+				movement.velocity.y = 0;
 			}
 			newPosition = tempPosition;
 			boundingBoxComponent.boundingBox = newBoundingBox;
@@ -158,10 +151,10 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 	camera.position = newPosition;
 }
 
-void	PlayerSystem(entt::registry &registry, const float &deltaTime, AssetsManager &assetsManager) {
+void	PlayerSystem(entt::registry &registry, const float &deltaTime) {
 	auto view = registry.view<
 		PlayerTag,
-		Velocity,
+		Movement,
 		Direction,
 		Dimensions,
 		CameraComponent,
@@ -175,7 +168,7 @@ void	PlayerSystem(entt::registry &registry, const float &deltaTime, AssetsManage
 		UpdatePlayerPosition(registry, player, deltaTime);
 
 		HandlePlayerMouseDirectionInput(registry, player);
-		HandlePlayerMouseClickingInput(registry, player, assetsManager);
+		HandlePlayerMouseClickingInput(registry, player);
 	}
 }
 

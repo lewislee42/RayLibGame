@@ -8,7 +8,7 @@
 # include <entt/entt.hpp>
 
 # include <PlayerSystem.h>
-/*# include <Movement.h>*/
+# include <PlayerWeaponSystem.h>
 # include <Collision.h>
 # include <Render3D.h>
 # include <RenderUI.h>

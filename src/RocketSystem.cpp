@@ -4,12 +4,12 @@
 
 
 #include <iostream>
-void	RocketSystem(entt::registry &registry, const float &deltaTime) {
-	auto view = registry.view<RocketTag, Velocity, Position, Dimensions, BoundingBoxComponent, Lifetime>();
+void	RocketSystem(entt::registry &registry, const float &deltaTime, AssetsManager &assetsManager) {
+	auto view = registry.view<RocketTag, Movement, Position, Dimensions, BoundingBoxComponent, Lifetime>();
 
 	for (auto &entity : view) {
 		Vector3 &position			= registry.get<Position>(entity).position;
-		Vector3 &velocity			= registry.get<Velocity>(entity).velocity;
+		Movement &movement			= registry.get<Movement>(entity);
 		Dimensions dimensions		= registry.get<Dimensions>(entity);
 		BoundingBox	&boundingBox	= registry.get<BoundingBoxComponent>(entity).boundingBox;
 		float &lifetime 			= registry.get<Lifetime>(entity).lifetime;
@@ -21,7 +21,7 @@ void	RocketSystem(entt::registry &registry, const float &deltaTime) {
 		}
 
 
-		Vector3 newPosition = Vector3Add(position, Vector3Scale(velocity, deltaTime));
+		Vector3 newPosition = Vector3Add(position, Vector3Scale(movement.velocity, movement.speed * deltaTime));
 		BoundingBox newBoundingBox = {
 			.min = {
 				newPosition.x - dimensions.width / 2,
@@ -38,6 +38,7 @@ void	RocketSystem(entt::registry &registry, const float &deltaTime) {
 		
 		if (CollisionCheck(newBoundingBox, entity, registry)) {
 			registry.destroy(entity); // delete as of now
+			// spawn explosion
 			continue ;
 		}
 		position = newPosition;
@@ -60,13 +61,13 @@ void	SpawnRocket(entt::registry &registry, const entt::entity &shooter, AssetsMa
 
 	Model &model = assetsManager.models["ROCKET"];
 	Vector3 newPosition = Vector3Add(position, direction);
-	float speed = 20.0f;
+	float speed = 10.0f;
 	registry.emplace<RocketTag>(rocket);
-	registry.emplace<ModelComponent>(rocket, model);
+	registry.emplace<ModelComponent>(rocket, model, 1.0f);
 	registry.emplace<Position>(rocket, newPosition);
 	registry.emplace<Direction>(rocket, direction);
 	registry.emplace<ColorComponent>(rocket, BLACK);
-	registry.emplace<Velocity>(rocket, Vector3Scale(direction, speed));
+	registry.emplace<Movement>(rocket, Vector3Scale(direction, speed), speed);
 	registry.emplace<Lifetime>(rocket, 5.0f);
 	/*registry.emplace<Damage>(rocket, 60.0f);	// not used yet*/
 	BoundingBox boundingBox = GetMeshBoundingBox(model.meshes[0]);

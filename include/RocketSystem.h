@@ -11,7 +11,7 @@
 # include <Collision.h>
 # include <AssetsManager.h>
 
-void	RocketSystem(entt::registry &registry, const float &deltaTime);
+void	RocketSystem(entt::registry &registry, const float &deltaTime, AssetsManager &assetsManager);
 void	SpawnRocket(entt::registry &registry, const entt::entity &shooter, AssetsManager &assetsManager);
 
 #endif /* ROCKET_SYSTEM_H */
