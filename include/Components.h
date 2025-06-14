@@ -43,11 +43,8 @@ struct CameraComponent {
 	};
 };
 
-struct BoundingBoxComponent {
-	BoundingBox	boundingBox;
-};
-
 struct Dimensions {
+	BoundingBox	boundingBox;
 	float	width;
 	float	height;
 	float	depth;

@@ -5,14 +5,13 @@
 
 #include <iostream>
 void	RocketSystem(entt::registry &registry, const float &deltaTime, AssetsManager &assetsManager) {
-	auto view = registry.view<RocketTag, Movement, Position, Dimensions, BoundingBoxComponent, Lifetime>();
+	auto view = registry.view<RocketTag, Movement, Position, Dimensions, Lifetime>();
 
 	for (auto &entity : view) {
-		Vector3 &position			= registry.get<Position>(entity).position;
-		Movement &movement			= registry.get<Movement>(entity);
-		Dimensions dimensions		= registry.get<Dimensions>(entity);
-		BoundingBox	&boundingBox	= registry.get<BoundingBoxComponent>(entity).boundingBox;
-		float &lifetime 			= registry.get<Lifetime>(entity).lifetime;
+		Vector3 &position					= registry.get<Position>(entity).position;
+		Movement &movement					= registry.get<Movement>(entity);
+		Dimensions &dimensions				= registry.get<Dimensions>(entity);
+		float &lifetime 					= registry.get<Lifetime>(entity).lifetime;
 
 		lifetime -= deltaTime;
 		if (lifetime <= 0) {
@@ -42,7 +41,7 @@ void	RocketSystem(entt::registry &registry, const float &deltaTime, AssetsManage
 			continue ;
 		}
 		position = newPosition;
-		boundingBox = newBoundingBox;
+		dimensions.boundingBox = newBoundingBox;
 	}
 }
 
@@ -83,17 +82,17 @@ void	SpawnRocket(entt::registry &registry, const entt::entity &shooter, AssetsMa
 		boundingBox.max.y = fminf(boundingBox.max.y, meshBoundingBox.max.y);
 		boundingBox.max.z = fminf(boundingBox.max.z, meshBoundingBox.max.z);
 	}
-	registry.emplace<Dimensions>(
-		rocket,
-		boundingBox.max.x - boundingBox.min.x,
-		boundingBox.max.y - boundingBox.min.y, 
-		boundingBox.max.z - boundingBox.min.z
-	);
 	boundingBox = {
 		.min = Vector3Add(boundingBox.min, newPosition),
 		.max = Vector3Add(boundingBox.max, newPosition)
 	};
-	registry.emplace<BoundingBoxComponent>(rocket, boundingBox);
+	registry.emplace<Dimensions>(
+		rocket, 
+		boundingBox,
+		boundingBox.max.x - boundingBox.min.x,
+		boundingBox.max.y - boundingBox.min.y, 
+		boundingBox.max.z - boundingBox.min.z
+	);
 
 	Model &uploadedModel = registry.get<ModelComponent>(rocket).model;
 	float pitch = asin(-direction.y);

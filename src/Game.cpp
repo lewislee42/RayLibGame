@@ -83,21 +83,25 @@ void	Game::InitPlayer() {
 	registry.emplace<MouseInput>(player, 0.4f);
 	registry.emplace<Gravity>(player, 15.0f);
 	registry.emplace<IsGrounded>(player, false);
-	registry.emplace<Dimensions>(player, 1.0f, 1.0f, 1.0f);
-	Dimensions& playerSize = registry.get<Dimensions>(player);
 	CameraComponent& playerCamera = registry.get<CameraComponent>(player);
-	registry.emplace<BoundingBoxComponent>(player, (BoundingBox){
-		.min = {
-			playerCamera.camera.position.x - playerSize.width / 2,
-			playerCamera.camera.position.y - playerSize.height / 2,
-			playerCamera.camera.position.z - playerSize.depth / 2
+	registry.emplace<Dimensions>(
+		player,
+		(BoundingBox){
+			.min = {
+				playerCamera.camera.position.x - 1.0f / 2,
+				playerCamera.camera.position.y - 1.0f / 2,
+				playerCamera.camera.position.z - 1.0f / 2
+			},
+			.max = {
+				playerCamera.camera.position.x + 1.0f / 2,
+				playerCamera.camera.position.y + 1.0f / 2,
+				playerCamera.camera.position.z + 1.0f / 2
+			}
 		},
-		.max = {
-			playerCamera.camera.position.x + playerSize.width / 2,
-			playerCamera.camera.position.y + playerSize.height / 2,
-			playerCamera.camera.position.z + playerSize.depth / 2
-		}
-	});
+		1.0f,
+		1.0f,
+		1.0f
+	);
 	auto view = registry.view<WeaponComponent>();
 	entt::entity weapon = *view.begin();
 	registry.emplace<EquippedWeapon>(player, weapon);
@@ -106,6 +110,8 @@ void	Game::InitPlayer() {
 }
 
 void	Game::InitScene() {
+
+	/* -------- ADDS FLOOR -------- */
 	entt::entity floor = registry.create();
 	registry.emplace<ModelComponent>(floor, assetsManager.models["GROUND"], 1.0f);
 	registry.emplace<Position>(floor, Vector3{0.0f, 0.0f, 0.0f});
@@ -131,9 +137,17 @@ void	Game::InitScene() {
 		.min = Vector3Add(floorBoundingBox.min, position),
 		.max = Vector3Add(floorBoundingBox.max, position)
 	};
-	registry.emplace<BoundingBoxComponent>(floor, floorBoundingBoxWS);
+	registry.emplace<Dimensions>(
+		floor,
+		floorBoundingBoxWS,
+		floorBoundingBox.max.x - floorBoundingBox.min.x,
+		floorBoundingBox.max.y - floorBoundingBox.min.y, 
+		floorBoundingBox.max.z - floorBoundingBox.min.z
+
+	);
 	registry.emplace<ObjectTag>(floor);
 	
+
 
 	for (int i = 0; i < 100; i++) {
 		float x = -50 + (50 - -50) * ((double)rand() / (double(RAND_MAX) + 1)); // the -+ 50 is to keep it within the floor
@@ -181,11 +195,11 @@ void	Game::InitScene() {
 		};
 		registry.emplace<Dimensions>(
 			object,
+			boundingBoxWS,
 			boundingBox.max.x - boundingBox.min.x,
 			boundingBox.max.y - boundingBox.min.y, 
 			boundingBox.max.z - boundingBox.min.z
 		);
-		registry.emplace<BoundingBoxComponent>(object, boundingBoxWS);
 		registry.emplace<ObjectTag>(object);
 	}
 }

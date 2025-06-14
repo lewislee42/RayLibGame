@@ -101,7 +101,6 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 		movement.velocity.y += -gravity * deltaTime;
 
 	Dimensions& dimensions						= registry.get<Dimensions>(player);
-	BoundingBoxComponent &boundingBoxComponent	= registry.get<BoundingBoxComponent>(player);
 	for (int i = 0; i < 8; i++) {
 		BoundingBox newBoundingBox = {
 			.min = {
@@ -141,7 +140,7 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 				
 			}
 			newPosition = tempPosition;
-			boundingBoxComponent.boundingBox = newBoundingBox;
+			dimensions.boundingBox = newBoundingBox;
 			break;
 		}
 	}
@@ -156,7 +155,6 @@ void	PlayerSystem(entt::registry &registry, const float &deltaTime) {
 		Direction,
 		Dimensions,
 		CameraComponent,
-		BoundingBoxComponent,
 		MouseInput
 	>();
 
