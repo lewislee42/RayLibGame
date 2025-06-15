@@ -5,10 +5,10 @@
 
 #include <iostream>
 void	RocketSystem(entt::registry &registry, const float &deltaTime, AssetsManager &assetsManager) {
-	auto view = registry.view<RocketTag, Movement, Position, Dimensions, Lifetime>();
+	auto view = registry.view<RocketTag, Movement, PositionAndDirection, Dimensions, Lifetime>();
 
 	for (auto &entity : view) {
-		Vector3 &position					= registry.get<Position>(entity).position;
+		Vector3 &position					= registry.get<PositionAndDirection>(entity).position;
 		Movement &movement					= registry.get<Movement>(entity);
 		Dimensions &dimensions				= registry.get<Dimensions>(entity);
 		float &lifetime 					= registry.get<Lifetime>(entity).lifetime;
@@ -49,24 +49,16 @@ void	RocketSystem(entt::registry &registry, const float &deltaTime, AssetsManage
 void	SpawnRocket(entt::registry &registry, const entt::entity &shooter, AssetsManager &assetsManager) {
 	entt::entity rocket = registry.create();
 
-	Vector3 &direction = registry.get<Direction>(shooter).direction;
-	Vector3 position;
-	Position *pos = registry.try_get<Position>(shooter);
-	CameraComponent *camera = registry.try_get<CameraComponent>(shooter);
-	if (pos)
-		position = pos->position;
-	else if (camera) 
-		position = camera->camera.position;
+	PositionAndDirection posDir	= registry.get<PositionAndDirection>(shooter);
 
 	Model &model = assetsManager.models["ROCKET"];
-	Vector3 newPosition = Vector3Add(position, direction);
+	Vector3 newPosition = Vector3Add(posDir.position, posDir.direction);
 	float speed = 10.0f;
 	registry.emplace<RocketTag>(rocket);
 	registry.emplace<ModelComponent>(rocket, model, 1.0f);
-	registry.emplace<Position>(rocket, newPosition);
-	registry.emplace<Direction>(rocket, direction);
+	registry.emplace<PositionAndDirection>(rocket, newPosition, posDir.direction);
 	registry.emplace<ColorComponent>(rocket, BLACK);
-	registry.emplace<Movement>(rocket, Vector3Scale(direction, speed), speed);
+	registry.emplace<Movement>(rocket, Vector3Scale(posDir.direction, speed), speed);
 	registry.emplace<Lifetime>(rocket, 5.0f);
 	/*registry.emplace<Damage>(rocket, 60.0f);	// not used yet*/
 	BoundingBox boundingBox = GetMeshBoundingBox(model.meshes[0]);
@@ -95,8 +87,8 @@ void	SpawnRocket(entt::registry &registry, const entt::entity &shooter, AssetsMa
 	);
 
 	Model &uploadedModel = registry.get<ModelComponent>(rocket).model;
-	float pitch = asin(-direction.y);
-	float yaw = atan2(direction.x, direction.z);
+	float pitch = asin(-posDir.direction.y);
+	float yaw = atan2(posDir.direction.x, posDir.direction.z);
 	Matrix pitchMatrix = MatrixRotateX(pitch);
 	Matrix yawMatrix   = MatrixRotateY(yaw);
 	uploadedModel.transform = MatrixMultiply(pitchMatrix, yawMatrix);

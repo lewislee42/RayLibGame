@@ -6,13 +6,12 @@
 
 # include <iostream>
 void	HandlePlayerKeyboardInput(entt::registry &registry, const entt::entity &player) {
-	Movement& movement	= registry.get<Movement>(player);
-	Camera3D& camera	= registry.get<CameraComponent>(player).camera;
-	bool& isGrounded	= registry.get<IsGrounded>(player).isGrounded;
-	float& gravity		= registry.get<Gravity>(player).gravity;
-	Vector3& direction	= registry.get<Direction>(player).direction;
+	Movement& movement				= registry.get<Movement>(player);
+	Camera3D& camera				= registry.get<CameraComponent>(player).camera;
+	GravityComponent& gravityCom	= registry.get<GravityComponent>(player);
+	Vector3& direction				= registry.get<PositionAndDirection>(player).direction;
 
-	direction = Vector3Subtract(camera.target, camera.position);
+	// direction = Vector3Subtract(camera.target, camera.position);
 	Vector3 forward = Vector3Normalize(direction);
 	forward.y = 0;
 	if (Vector3LengthSqr(forward) > 0.001) {
@@ -43,16 +42,16 @@ void	HandlePlayerKeyboardInput(entt::registry &registry, const entt::entity &pla
 	}
 
 	/* ---- Handle jumping ---- */
-	if (IsKeyDown(KEY_SPACE) && isGrounded) {
-		movement.velocity.y += gravity + 5;
-		isGrounded = false;
+	if (IsKeyDown(KEY_SPACE) && gravityCom.isGrounded == true) {
+		movement.velocity.y += gravityCom.gravity + 5;
+		gravityCom.isGrounded = false;
 	}
 }
 
 void	HandlePlayerMouseDirectionInput(entt::registry &registry, const entt::entity &player) {
 	Camera3D& camera		= registry.get<CameraComponent>(player).camera;
 	float& mouseSensitivity	= registry.get<MouseInput>(player).mouseSensitivity;
-	Vector3& direction		= registry.get<Direction>(player).direction;
+	Vector3& direction		= registry.get<PositionAndDirection>(player).direction;
 
 	Vector2 mouseDelta = GetMouseDelta();
 	Vector3 currentLookDirection = Vector3Normalize(direction);
@@ -66,7 +65,7 @@ void	HandlePlayerMouseDirectionInput(entt::registry &registry, const entt::entit
 	float pitchAngle = -mouseDelta.y * mouseSensitivity;
 	currentLookDirection = Vector3RotateByAxisAngle(currentLookDirection, localRight, pitchAngle * DEG2RAD);
 
-	currentLookDirection = Vector3Normalize(currentLookDirection);
+	direction = Vector3Normalize(currentLookDirection);
 	camera.target = Vector3Add(camera.position, currentLookDirection);
 }
 
@@ -90,15 +89,15 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 		return ;
 
 
-	Camera3D &camera			= registry.get<CameraComponent>(player).camera;
-	currentPosition = camera.position;
-	newPosition = Vector3Add(camera.position, Vector3Scale(movement.velocity, deltaTime));
+	Camera3D &camera				= registry.get<CameraComponent>(player).camera;
+	PositionAndDirection &posDir	= registry.get<PositionAndDirection>(player);
+	currentPosition		= posDir.position;
+	newPosition			= Vector3Add(camera.position, Vector3Scale(movement.velocity, deltaTime));
 
 	
-	bool &isGrounded	= registry.get<IsGrounded>(player).isGrounded;
-	float &gravity		= registry.get<Gravity>(player).gravity;
-	if (isGrounded == false && movement.velocity.y > -50.0f)
-		movement.velocity.y += -gravity * deltaTime;
+	GravityComponent &gravityCom	= registry.get<GravityComponent>(player);
+	if (gravityCom.isGrounded == false && movement.velocity.y > -50.0f)
+		movement.velocity.y += -gravityCom.gravity * deltaTime;
 
 	Dimensions& dimensions						= registry.get<Dimensions>(player);
 	for (int i = 0; i < 8; i++) {
@@ -135,8 +134,8 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 
 		if (!CollisionCheck(newBoundingBox, player, registry)) {
 			if (tempPosition.y == currentPosition.y) {
-				isGrounded = true;
-				movement.velocity.y = -gravity;
+				gravityCom.isGrounded = true;
+				movement.velocity.y = -gravityCom.gravity;
 				
 			}
 			newPosition = tempPosition;
@@ -145,6 +144,7 @@ void	UpdatePlayerPosition(entt::registry &registry, const entt::entity &player, 
 		}
 	}
 
+	posDir.position = newPosition;
 	camera.position = newPosition;
 }
 
@@ -152,7 +152,6 @@ void	PlayerSystem(entt::registry &registry, const float &deltaTime) {
 	auto view = registry.view<
 		PlayerTag,
 		Movement,
-		Direction,
 		Dimensions,
 		CameraComponent,
 		MouseInput

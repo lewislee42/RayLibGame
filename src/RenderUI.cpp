@@ -13,19 +13,17 @@ void	DrawVector(std::string text, const Vector3 &vec, const uint &x, const uint 
 void	DrawUI(entt::registry &registry) {
 	auto view = registry.view<PlayerTag>();
 
-	entt::entity player = *view.begin();
-	Camera3D& camera = registry.get<CameraComponent>(player).camera;
-	Vector3& direction = registry.get<Direction>(player).direction;
-	Movement& movement = registry.get<Movement>(player);
+	entt::entity player 			= *view.begin();
+	PositionAndDirection& posDir	= registry.get<PositionAndDirection>(player);
+	Movement& movement				= registry.get<Movement>(player);
 
 	auto rocketsView = registry.view<RocketTag>();
 	int rocketCount = rocketsView.size();
 
 	DrawFPS(10, 10);
-	DrawVector("position", camera.position, 10, 40);
-	DrawVector("direction", direction, 10, 50);
+	DrawVector("position", posDir.position, 10, 40);
+	DrawVector("direction", posDir.direction, 10, 50);
 	DrawVector("velocity", movement.velocity, 10, 60);
-	std::string rocketString("Rockets in scene: ");
-	rocketString += std::to_string(rocketCount);
+	std::string rocketString("Rockets in scene: " + std::to_string(rocketCount));
 	DrawText(rocketString.c_str(), 10, 70, 10, BLACK);
 }

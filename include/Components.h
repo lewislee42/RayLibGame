@@ -1,4 +1,5 @@
 
+
 #ifndef COMPONENTS_H 
 # define COMPONENTS_H 
 
@@ -9,34 +10,20 @@ enum WeaponEnum {
 	ROCKET_LAUNCHER = 0
 };
 
-struct Position {
-	Vector3 position;
+struct PositionAndDirection {
+	Vector3 position	= {0};
+	Vector3 direction	= {0.0f, 0.0f, 1.0f};
 };
 
 struct Movement {
-	Vector3 velocity;
-	float	speed;
-};
-
-struct Direction {
-	Vector3 direction;
+	Vector3 velocity	= {0};
+	float	speed		= {0};
 };
 
 struct CameraComponent {
-	Camera3D	camera;
+	Camera3D	camera = {0};
 
 	CameraComponent() {
-		camera				= Camera3D();
-		camera.position		= Vector3{0.0f, 5.1f, 0.0f};
-		camera.target		= Vector3{0.0f, 5.1f, 1.0f};
-		camera.up			= Vector3{0.0f, 1.0f, 0.0f};
-		camera.fovy			= 60.0f;
-		camera.projection	= CAMERA_PERSPECTIVE;
-	};
-	CameraComponent(const Vector3 &position) {
-		camera				= Camera3D();
-		camera.position		= position;
-		camera.target		= Vector3{0.0f, 0.0f, 1.0f};
 		camera.up			= Vector3{0.0f, 1.0f, 0.0f};
 		camera.fovy			= 60.0f;
 		camera.projection	= CAMERA_PERSPECTIVE;
@@ -44,47 +31,44 @@ struct CameraComponent {
 };
 
 struct Dimensions {
-	BoundingBox	boundingBox;
-	float	width;
-	float	height;
-	float	depth;
+	BoundingBox	boundingBox	= {0};
+	float	width			= {1.0f};
+	float	height			= {1.0f};
+	float	depth			= {1.0f};
 };
 
 struct MouseInput {
-	float	mouseSensitivity;
+	float	mouseSensitivity = {0.4};
 };
 
-struct IsGrounded {
-	bool	isGrounded;
-};
-
-struct Gravity {
-	float	gravity;
+struct GravityComponent {
+	bool	isGrounded	= {false};
+	float	gravity		= {9.3f};
 };
 
 struct ModelComponent {
-	Model	model;
-	float	scale;
+	Model	model = {0};
+	float	scale = {1.0f};
 };
 
 struct ColorComponent {
-	Color	color;
+	Color	color = {0};
 };
 
 
 struct Lifetime {
-	float	lifetime;
+	float	lifetime = {0};
 };
 
 struct WeaponComponent {
 	WeaponEnum	weaponType;
-	float		firerate;
-	float		firerateCooldown;
-	int			ammo;	// not used yet
+	float		firerate			= {0};
+	float		firerateCooldown	= {0};
+	int			ammo				= {0}; // not used yet
 };
 
 struct OwnedBy {
-	entt::entity owner;
+	entt::entity	owner;
 };
 
 struct EquippedWeapon {

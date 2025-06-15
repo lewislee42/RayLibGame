@@ -1,5 +1,6 @@
 
 
+#include "raylib/raylib.h"
 #include <Game.h>
 #include <iostream>
 
@@ -77,13 +78,18 @@ void	Game::Run() {
 
 void	Game::InitPlayer() {
 	entt::entity player = registry.create();
-	registry.emplace<Movement>(player, Vector3{0.0f, -15.0f, 0.0f}, 9.0f);
-	registry.emplace<Direction>(player, Vector3{0.0f, 0.0f, 1.0f});
-	registry.emplace<CameraComponent>(player, Vector3{0.0f, 1.1f, 0.0f});
+
+	float gravity = 9.3f;
+	Vector3 pos = {0.0f, 1.1f, 0.0f};
+	Vector3 dir = {0.0f, 0.0f, 1.0f};
+
+	registry.emplace<Movement>(player, Vector3{0.0f, -gravity, 0.0f}, 9.0f);
+	registry.emplace<PositionAndDirection>(player, pos, dir);
+	registry.emplace<CameraComponent>(player);
 	registry.emplace<MouseInput>(player, 0.4f);
-	registry.emplace<Gravity>(player, 15.0f);
-	registry.emplace<IsGrounded>(player, false);
+	registry.emplace<GravityComponent>(player);
 	CameraComponent& playerCamera = registry.get<CameraComponent>(player);
+
 	registry.emplace<Dimensions>(
 		player,
 		(BoundingBox){
@@ -114,11 +120,10 @@ void	Game::InitScene() {
 	/* -------- ADDS FLOOR -------- */
 	entt::entity floor = registry.create();
 	registry.emplace<ModelComponent>(floor, assetsManager.models["GROUND"], 1.0f);
-	registry.emplace<Position>(floor, Vector3{0.0f, 0.0f, 0.0f});
+	registry.emplace<PositionAndDirection>(floor, Vector3{0.0f, 0.0f, 0.0f});
 	registry.emplace<ColorComponent>(floor, GRAY);
-	registry.emplace<Direction>(floor, Vector3{0.0f, 0.0f, 1.0f});
 	Model &model = registry.get<ModelComponent>(floor).model;
-	Vector3 &position = registry.get<Position>(floor).position;
+	Vector3 &position = registry.get<PositionAndDirection>(floor).position;
 	BoundingBox floorBoundingBox = GetMeshBoundingBox(model.meshes[0]);
 
 	for (int i = 1; i < model.meshCount; i++) {
@@ -170,11 +175,10 @@ void	Game::InitScene() {
 
 		entt::entity object = registry.create();
 		registry.emplace<ModelComponent>(object, assetsManager.models[assetName], 1.0f);
-		registry.emplace<Position>(object, Vector3{x, y, z});
+		registry.emplace<PositionAndDirection>(object, Vector3{x, y, z});
 		registry.emplace<ColorComponent>(object, color);
-		registry.emplace<Direction>(object, Vector3{0.0f, 0.0f, 1.0f});
 		Model &objectModel = registry.get<ModelComponent>(object).model;
-		Vector3 &objectPosition = registry.get<Position>(object).position;
+		Vector3 &objectPosition = registry.get<PositionAndDirection>(object).position;
 		BoundingBox boundingBox = GetMeshBoundingBox(objectModel.meshes[0]);
 
 		for (int i = 1; i < objectModel.meshCount; i++) {
