@@ -55,7 +55,6 @@ struct ColorComponent {
 	Color	color = {0};
 };
 
-
 struct Lifetime {
 	float	lifetime = {0};
 };
