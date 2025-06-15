@@ -24,15 +24,15 @@ AssetsManager::AssetsManager() {
 	models["ROCKET_LAUNCHER"] = LoadModelFromMesh(GenMeshCube(0.2f, 0.2f, 0.5f));
 	models["ROCKET_EXPLOSION"] = LoadModelFromMesh(GenMeshSphere(1, 5, 5));
 
-	for (std::map<std::string, Model>::iterator i = models.begin(); i != models.end(); i++) {
-		std::cout << "INFO: Loaded model: " << i->first << std::endl;
+	for (auto i : models) {
+		std::cout << "INFO: Loaded model: " << i.first << std::endl;
 	}
 }
 
 AssetsManager::~AssetsManager() {
 	// unloads models
-	for (std::map<std::string, Model>::iterator i = models.begin(); i != models.end(); i++) {
-		UnloadModel(i->second);
-		std::cout << "INFO: Unloaded model: " << i->first << std::endl;
+	for (auto i : models) {
+		UnloadModel(i.second);
+		std::cout << "INFO: Unloaded model: " << i.first << std::endl;
 	}
 }
