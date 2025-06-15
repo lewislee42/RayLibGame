@@ -1,0 +1,4 @@
+.cache
+*.o
+RayLibGame
+compile_commands.json

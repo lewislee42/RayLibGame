@@ -4,7 +4,7 @@
 #ifndef ASSETS_MANAGER_CLASS_H 
 # define ASSETS_MANAGER_CLASS_H 
 
-# include <raylib.h>
+# include <raylib/raylib.h>
 # include <map>
 # include <string>
 

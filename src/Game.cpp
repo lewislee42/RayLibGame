@@ -1,0 +1,216 @@
+
+
+#include "raylib/raylib.h"
+#include <Game.h>
+#include <iostream>
+
+
+Game::Game(): assetsManager() {
+
+	InitScene();
+	InitWeapons();
+	InitPlayer();
+}
+
+Game::~Game() {
+}
+
+
+
+// helper function
+Color	randomColor() {
+	float n = ((double)rand() / (double(RAND_MAX) + 1));
+
+	if (n < 0.1)
+		return RED;
+	else if (n < 0.2)
+		return GREEN;
+	else if (n < 0.3)
+		return BLUE;
+	else if (n < 0.4)
+		return GOLD;
+	else if (n < 0.5)
+		return BROWN;
+	else if (n < 0.6)
+		return VIOLET;
+	else if (n < 0.7)
+		return PINK;
+	else if (n < 0.8)
+		return LIME;
+	else if (n < 0.9)
+		return DARKBLUE;
+	else
+		return BLACK;
+}
+
+void	Game::Run() {
+	while (!WindowShouldClose()) {
+		auto view = registry.view<CameraComponent>();
+		auto entity = *view.begin();
+		Camera3D &camera = registry.get<CameraComponent>(entity).camera;
+
+		// Handles Input
+		float dt = GetFrameTime();
+		PlayerSystem(registry, dt);
+		PlayerWeaponSystem(registry, dt, assetsManager);
+		RocketSystem(registry, dt, assetsManager);
+		
+
+		
+		// Preps for Drawing
+		ClearBackground(WHITE);
+		BeginDrawing();
+
+		BeginMode3D(camera);
+
+			// Draws
+			RenderObjects(registry);
+
+		EndMode3D();
+
+		/* ---- Drawing UI ---- */
+		DrawUI(registry);
+
+		EndDrawing();
+	}
+
+}
+
+void	Game::InitPlayer() {
+	entt::entity player = registry.create();
+
+	float gravity = 9.3f;
+	Vector3 pos = {0.0f, 1.1f, 0.0f};
+	Vector3 dir = {0.0f, 0.0f, 1.0f};
+
+	registry.emplace<Movement>(player, Vector3{0.0f, -gravity, 0.0f}, 9.0f);
+	registry.emplace<PositionAndDirection>(player, pos, dir);
+	registry.emplace<CameraComponent>(player);
+	registry.emplace<MouseInput>(player, 0.4f);
+	registry.emplace<GravityComponent>(player);
+	CameraComponent& playerCamera = registry.get<CameraComponent>(player);
+
+	registry.emplace<Dimensions>(
+		player,
+		(BoundingBox){
+			.min = {
+				playerCamera.camera.position.x - 1.0f / 2,
+				playerCamera.camera.position.y - 1.0f / 2,
+				playerCamera.camera.position.z - 1.0f / 2
+			},
+			.max = {
+				playerCamera.camera.position.x + 1.0f / 2,
+				playerCamera.camera.position.y + 1.0f / 2,
+				playerCamera.camera.position.z + 1.0f / 2
+			}
+		},
+		1.0f,
+		1.0f,
+		1.0f
+	);
+	auto view = registry.view<WeaponComponent>();
+	entt::entity weapon = *view.begin();
+	registry.emplace<EquippedWeapon>(player, weapon);
+	registry.emplace<OwnedBy>(weapon, player);
+	registry.emplace<PlayerTag>(player);
+}
+
+void	Game::InitScene() {
+
+	/* -------- ADDS FLOOR -------- */
+	entt::entity floor = registry.create();
+	registry.emplace<ModelComponent>(floor, assetsManager.models["GROUND"], 1.0f);
+	registry.emplace<PositionAndDirection>(floor, Vector3{0.0f, 0.0f, 0.0f});
+	registry.emplace<ColorComponent>(floor, GRAY);
+	Model &model = registry.get<ModelComponent>(floor).model;
+	Vector3 &position = registry.get<PositionAndDirection>(floor).position;
+	BoundingBox floorBoundingBox = GetMeshBoundingBox(model.meshes[0]);
+
+	for (int i = 1; i < model.meshCount; i++) {
+		BoundingBox meshBoundingBox = GetMeshBoundingBox(model.meshes[i]);
+
+		floorBoundingBox.min.x = fminf(floorBoundingBox.min.x, meshBoundingBox.min.x);
+		floorBoundingBox.min.y = fminf(floorBoundingBox.min.y, meshBoundingBox.min.y);
+		floorBoundingBox.min.z = fminf(floorBoundingBox.min.z, meshBoundingBox.min.z);
+
+
+		floorBoundingBox.max.x = fminf(floorBoundingBox.max.x, meshBoundingBox.max.x);
+		floorBoundingBox.max.y = fminf(floorBoundingBox.max.y, meshBoundingBox.max.y);
+		floorBoundingBox.max.z = fminf(floorBoundingBox.max.z, meshBoundingBox.max.z);
+	}
+	BoundingBox floorBoundingBoxWS = {
+		.min = Vector3Add(floorBoundingBox.min, position),
+		.max = Vector3Add(floorBoundingBox.max, position)
+	};
+	registry.emplace<Dimensions>(
+		floor,
+		floorBoundingBoxWS,
+		floorBoundingBox.max.x - floorBoundingBox.min.x,
+		floorBoundingBox.max.y - floorBoundingBox.min.y, 
+		floorBoundingBox.max.z - floorBoundingBox.min.z
+
+	);
+	registry.emplace<ObjectTag>(floor);
+	
+
+
+	for (int i = 0; i < 100; i++) {
+		float x = -50 + (50 - -50) * ((double)rand() / (double(RAND_MAX) + 1)); // the -+ 50 is to keep it within the floor
+		float z = -50 + (50 - -50) * ((double)rand() / (double(RAND_MAX) + 1));
+		float y = 1;
+
+		float randomNumber = ((double)rand() / (double(RAND_MAX) + 1));
+
+		Color color = randomColor();
+		std::string assetName;
+
+		if (randomNumber < 0.25)
+			assetName = "BLOCK_0";
+		else if (randomNumber < 0.5)
+			assetName = "BLOCK_1";
+		else if (randomNumber < 0.75)
+			assetName = "BLOCK_2";
+		else
+			assetName = "BLOCK_3";
+
+		entt::entity object = registry.create();
+		registry.emplace<ModelComponent>(object, assetsManager.models[assetName], 1.0f);
+		registry.emplace<PositionAndDirection>(object, Vector3{x, y, z});
+		registry.emplace<ColorComponent>(object, color);
+		Model &objectModel = registry.get<ModelComponent>(object).model;
+		Vector3 &objectPosition = registry.get<PositionAndDirection>(object).position;
+		BoundingBox boundingBox = GetMeshBoundingBox(objectModel.meshes[0]);
+
+		for (int i = 1; i < objectModel.meshCount; i++) {
+			BoundingBox meshBoundingBox = GetMeshBoundingBox(objectModel.meshes[i]);
+
+			boundingBox.min.x = fminf(boundingBox.min.x, meshBoundingBox.min.x);
+			boundingBox.min.y = fminf(boundingBox.min.y, meshBoundingBox.min.y);
+			boundingBox.min.z = fminf(boundingBox.min.z, meshBoundingBox.min.z);
+
+
+			boundingBox.max.x = fminf(boundingBox.max.x, meshBoundingBox.max.x);
+			boundingBox.max.y = fminf(boundingBox.max.y, meshBoundingBox.max.y);
+			boundingBox.max.z = fminf(boundingBox.max.z, meshBoundingBox.max.z);
+		}
+		BoundingBox boundingBoxWS = {
+			.min = Vector3Add(boundingBox.min, objectPosition),
+			.max = Vector3Add(boundingBox.max, objectPosition)
+		};
+		registry.emplace<Dimensions>(
+			object,
+			boundingBoxWS,
+			boundingBox.max.x - boundingBox.min.x,
+			boundingBox.max.y - boundingBox.min.y, 
+			boundingBox.max.z - boundingBox.min.z
+		);
+		registry.emplace<ObjectTag>(object);
+	}
+}
+
+void	Game::InitWeapons() {
+	entt::entity rocketLauncher = registry.create();
+
+	registry.emplace<ModelComponent>(rocketLauncher, assetsManager.models["ROCKET_LAUNCHER"]);
+	registry.emplace<WeaponComponent>(rocketLauncher, ROCKET_LAUNCHER, 0.8f, 0.0f);
+}
